@@ -1,13 +1,15 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/ar_cubit.dart';
 import '../cubits/ar_state.dart';
 import '../cubits/qibla_cubit.dart';
 import '../cubits/qibla_state.dart';
+import '../cubits/tilt_cubit.dart';
+import '../cubits/tilt_state.dart';
 import '../widgets/ar_view_enhanced_android.dart';
 import '../widgets/ar_view_enhanced_ios.dart';
+import '../widgets/vertical_position_warning.dart';
 
 class ARQiblaPage extends StatefulWidget {
   const ARQiblaPage({super.key});
@@ -24,6 +26,14 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
   void initState() {
     super.initState();
     _initializeAR();
+    // Start monitoring device tilt for vertical position warning
+    context.read<TiltCubit>().startMonitoring();
+  }
+
+  @override
+  void dispose() {
+    context.read<TiltCubit>().close();
+    super.dispose();
   }
 
   Future<void> _initializeAR() async {
@@ -271,6 +281,17 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                 ),
             ],
           );
+        },
+      ),
+      // Vertical position warning overlay (handled at page level using TiltCubit)
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: BlocBuilder<TiltCubit, TiltState>(
+        builder: (context, tiltState) {
+          // Show warning when phone is not vertical
+          if (tiltState is TiltNotVertical) {
+            return VerticalPositionWarning(animate: tiltState.animateIcon);
+          }
+          return const SizedBox.shrink();
         },
       ),
     );
