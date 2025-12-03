@@ -175,14 +175,6 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
     // This could be enhanced to animate or change color
   }
 
-  // Calculate angle difference for navigation guidance
-  double get _angleDifference {
-    final diff = (_currentHeading - widget.qiblaBearing).abs();
-    return diff > 180 ? 360 - diff : diff;
-  }
-
-  bool get _isAligned => _angleDifference < 15;
-
   @override
   Widget build(BuildContext context) {
     // Calculate angle difference for arrow direction
@@ -249,6 +241,38 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
           left: 0,
           right: 0,
           child: _buildNavigationOverlay(),
+        ),
+        
+        // Kaaba image overlay (centered, same as splash screen)
+        Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // White arrow pointing down
+              const Icon(
+                Icons.arrow_downward,
+                color: Colors.white,
+                size: 48,
+                shadows: [
+                  Shadow(
+                    color: Colors.black,
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Kaaba image (transparent, no border/shadow)
+              Opacity(
+                opacity: 0.8, // Semi-transparent
+                child: Image.asset(
+                  'assets/images/qibla.png',
+                  width: 120,
+                  height: 150,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

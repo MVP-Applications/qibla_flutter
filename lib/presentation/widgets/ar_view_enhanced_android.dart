@@ -34,7 +34,6 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
   
   double _currentHeading = 0.0;
   double _pitch = 0.0; // Up/down tilt
-  double _roll = 0.0;  // Side tilt
   
   // Smoothed position to reduce vibration
   Offset _smoothedKaabaPosition = Offset.zero;
@@ -103,21 +102,19 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
       }
     });
     
-    // Accelerometer for pitch and roll (device orientation) with smoothing
-    double _smoothedPitch = 0.0;
+    // Accelerometer for pitch (device orientation) with smoothing
+    double smoothedPitch = 0.0;
     _accelSubscription = accelerometerEventStream().listen((event) {
       if (!mounted) return;
       
-      // Calculate pitch (up/down tilt) and roll (side tilt)
+      // Calculate pitch (up/down tilt)
       final pitch = math.atan2(-event.x, math.sqrt(event.y * event.y + event.z * event.z));
-      final roll = math.atan2(event.y, event.z);
       
       // Smooth pitch to reduce jitter
-      _smoothedPitch = _smoothedPitch + (pitch * 180 / math.pi - _smoothedPitch) * 0.2;
+      smoothedPitch = smoothedPitch + (pitch * 180 / math.pi - smoothedPitch) * 0.2;
       
       setState(() {
-        _pitch = _smoothedPitch;
-        _roll = roll * 180 / math.pi;
+        _pitch = smoothedPitch;
       });
     });
   }
@@ -168,20 +165,10 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
     return _smoothedKaabaPosition;
   }
 
-  // Check if Kaaba is visible in current view
-  bool _isKaabaVisible(Offset position, Size screenSize) {
-    return position.dx >= -100 && 
-           position.dx <= screenSize.width + 100 &&
-           position.dy >= -100 && 
-           position.dy <= screenSize.height + 100;
-  }
-
   double get _angleDifference {
     double diff = (_currentHeading - widget.qiblaBearing).abs();
     return diff > 180 ? 360 - diff : diff;
   }
-
-  bool get _isAligned => _angleDifference < 15;
 
   @override
   Widget build(BuildContext context) {
@@ -278,10 +265,10 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Green arrow pointing down
+          // White arrow pointing down
           const Icon(
             Icons.arrow_downward,
-            color: Colors.green,
+            color: Colors.white,
             size: 48,
             shadows: [
               Shadow(
@@ -291,47 +278,14 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
             ],
           ),
           const SizedBox(height: 8),
-          // Kaaba representation
-          Container(
-            width: 100,
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withValues(alpha: 0.5),
-                  blurRadius: 20,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.mosque,
-                  color: Colors.amber,
-                  size: 48,
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'KAABA',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+          // Kaaba image (transparent, no border/shadow)
+          Opacity(
+            opacity: 0.8, // Semi-transparent
+            child: Image.asset(
+              'assets/images/qibla.png',
+              width: 120,
+              height: 150,
+              fit: BoxFit.contain,
             ),
           ),
         ],
