@@ -40,8 +40,8 @@ class ExampleHomePage extends StatelessWidget {
         children: [
           _buildExampleCard(
             context,
-            title: 'AR View',
-            description: 'Find Qibla using Augmented Reality',
+            title: 'AR View (Clean)',
+            description: 'AR with hidden UI elements',
             icon: Icons.view_in_ar,
             color: Colors.blue,
             onTap: () => Navigator.push(
@@ -53,7 +53,41 @@ class ExampleHomePage extends StatelessWidget {
                     BlocProvider(create: (_) => getIt<ARCubit>()),
                     BlocProvider(create: (_) => getIt<TiltCubit>()),
                   ],
-                  child: const ARQiblaPage(),
+                  child: const ARQiblaPage(
+                    config: ARPageConfig(
+                      showTopBar: false,
+                      showInstructions: false,
+                      showCompassIndicators: true,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildExampleCard(
+            context,
+            title: 'AR View (Full UI)',
+            description: 'AR with all UI elements visible',
+            icon: Icons.dashboard,
+            color: Colors.purple,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => getIt<QiblaCubit>()),
+                    BlocProvider(create: (_) => getIt<ARCubit>()),
+                    BlocProvider(create: (_) => getIt<TiltCubit>()),
+                  ],
+                  child: const ARQiblaPage(
+                    config: ARPageConfig(
+                      showTopBar: true,
+                      showInstructions: true,
+                      showCompassIndicators: true,
+                      customTitle: 'Find Qibla',
+                    ),
+                  ),
                 ),
               ),
             ),

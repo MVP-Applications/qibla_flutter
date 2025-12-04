@@ -11,8 +11,36 @@ import '../widgets/ar_view_enhanced_android.dart';
 import '../widgets/ar_view_enhanced_ios.dart';
 import '../widgets/vertical_position_warning.dart';
 
+/// Configuration for AR Qibla Page UI elements
+class ARPageConfig {
+  /// Show the top title bar with "AR Qibla Direction"
+  final bool showTopBar;
+  
+  /// Show the bottom instructions overlay
+  final bool showInstructions;
+  
+  /// Show the compass indicators (Qibla bearing and device heading)
+  final bool showCompassIndicators;
+  
+  /// Custom title text (if showTopBar is true)
+  final String? customTitle;
+
+  const ARPageConfig({
+    this.showTopBar = false,
+    this.showInstructions = false,
+    this.showCompassIndicators = true,
+    this.customTitle,
+  });
+}
+
 class ARQiblaPage extends StatefulWidget {
-  const ARQiblaPage({super.key});
+  /// Configuration for UI elements visibility
+  final ARPageConfig config;
+
+  const ARQiblaPage({
+    super.key,
+    this.config = const ARPageConfig(),
+  });
 
   @override
   State<ARQiblaPage> createState() => _ARQiblaPageState();
@@ -145,40 +173,42 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                   ),
                 ),
 
-              // Top bar with title
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: 0.7),
-                          Colors.transparent,
-                        ],
+              // Top bar with title (OPTIONAL)
+              if (widget.config.showTopBar)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.7),
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'AR Qibla Direction',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      child: Center(
+                        child: Text(
+                          widget.config.customTitle ?? 'AR Qibla Direction',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              // Instructions overlay - Kaaba is automatically placed
-              if (state is ARReady || state is ARPlaneDetected || state is ARObjectPlaced)
+              // Instructions overlay (OPTIONAL)
+              if (widget.config.showInstructions && 
+                  (state is ARReady || state is ARPlaneDetected || state is ARObjectPlaced))
                 Positioned(
                   bottom: 30,
                   left: 20,
@@ -210,64 +240,66 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                   ),
                 ),
 
-              // Qibla bearing indicator
-              if (_qiblaBearing != null)
-                Positioned(
-                  top: 100,
-                  right: 20,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.explore, color: Colors.white, size: 24),
-                        const SizedBox(height: 4),
-                        Text(
-                          _qiblaBearing == 0.0 ? 'Default' : 'Qibla',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
+              // Compass indicators (OPTIONAL)
+              if (widget.config.showCompassIndicators) ...[
+                // Qibla bearing indicator
+                if (_qiblaBearing != null)
+                  Positioned(
+                    top: 100,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.explore, color: Colors.white, size: 24),
+                          const SizedBox(height: 4),
+                          Text(
+                            _qiblaBearing == 0.0 ? 'Default' : 'Qibla',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
                           ),
-                        ),
-                        Text(
-                          _qiblaBearing == 0.0 ? 'North' : '${_qiblaBearing!.toStringAsFixed(0)}°',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          Text(
+                            _qiblaBearing == 0.0 ? 'North' : '${_qiblaBearing!.toStringAsFixed(0)}°',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-              // Device heading indicator
-              if (_deviceHeading != null)
-                Positioned(
-                  top: 100,
-                  left: 20,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.navigation, color: Colors.white, size: 24),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Heading',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
+                // Device heading indicator
+                if (_deviceHeading != null)
+                  Positioned(
+                    top: 100,
+                    left: 20,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.navigation, color: Colors.white, size: 24),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Heading',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
                           ),
-                        ),
-                        Text(
+                          Text(
                           '${_deviceHeading!.toStringAsFixed(0)}°',
                           style: const TextStyle(
                             color: Colors.white,
@@ -278,7 +310,8 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                       ],
                     ),
                   ),
-                ),
+                  ),
+              ],
             ],
           );
         },
