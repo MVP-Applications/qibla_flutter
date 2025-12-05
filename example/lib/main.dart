@@ -57,7 +57,7 @@ class ExampleHomePage extends StatelessWidget {
                     config: ARPageConfig(
                       showTopBar: false,
                       showInstructions: false,
-                      showCompassIndicators: true,
+                      showCompassIndicators:false,
                     ),
                   ),
                 ),

@@ -13,11 +13,13 @@ import '../cubits/ar_cubit.dart';
 class ARViewEnhancedAndroid extends StatefulWidget {
   final double qiblaBearing;
   final double deviceHeading;
+  final bool showOverlay;
 
   const ARViewEnhancedAndroid({
     super.key,
     required this.qiblaBearing,
     required this.deviceHeading,
+    required this.showOverlay,
   });
 
   @override
@@ -246,6 +248,7 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
           ),
         
         // Navigation overlay
+        if(widget.showOverlay)
         Positioned(
           top: 120,
           left: 0,

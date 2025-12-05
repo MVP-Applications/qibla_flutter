@@ -11,12 +11,12 @@ import '../cubits/ar_cubit.dart';
 class ARViewEnhancedIOS extends StatefulWidget {
   final double qiblaBearing;
   final double deviceHeading;
-
-  const ARViewEnhancedIOS({
-    super.key,
-    required this.qiblaBearing,
-    required this.deviceHeading,
-  });
+  final bool showOverlay;
+  const ARViewEnhancedIOS(
+      {super.key,
+      required this.qiblaBearing,
+      required this.deviceHeading,
+      required this.showOverlay});
 
   @override
   State<ARViewEnhancedIOS> createState() => _ARViewEnhancedIOSState();
@@ -26,14 +26,14 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
   ARKitController? arkitController;
   String? _kaabaNodeName;
   String? _arrowNodeName;
-  
+
   // Real-time compass tracking
   StreamSubscription? _compassSubscription;
   double _currentHeading = 0.0;
-  
+
   // Distance to Kaaba (in meters, for AR placement)
   static const double kaabaDistance = 5.0; // 5 meters in front
-  
+
   @override
   void initState() {
     super.initState();
@@ -60,7 +60,7 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
 
   void _onARKitViewCreated(ARKitController controller) {
     arkitController = controller;
-    
+
     // Automatically place Kaaba after AR session starts
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
@@ -76,7 +76,7 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
     // Calculate Kaaba position relative to user
     // Qibla bearing is the direction to Kaaba from user's location
     final qiblaRadians = widget.qiblaBearing * (math.pi / 180);
-    
+
     // Place Kaaba at specified distance in Qibla direction
     // X: East-West (positive = East)
     // Y: Up-Down (0 = ground level)
@@ -84,7 +84,7 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
     final x = kaabaDistance * math.sin(qiblaRadians);
     final z = -kaabaDistance * math.cos(qiblaRadians);
     final y = -0.5; // Slightly below eye level
-    
+
     _placeKaaba(vector.Vector3(x, y, z), qiblaRadians);
     _placeNavigationArrow(vector.Vector3(x, y + 0.3, z)); // Arrow above Kaaba
   }
@@ -98,7 +98,7 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
     }
 
     ARKitNode node;
-    
+
     try {
       // Try to load USDZ model (iOS format)
       node = ARKitReferenceNode(
@@ -116,9 +116,9 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
     arkitController!.add(node, parentNodeName: null);
 
     context.read<ARCubit>().placeQiblaObject(
-      position,
-      widget.qiblaBearing,
-    );
+          position,
+          widget.qiblaBearing,
+        );
   }
 
   ARKitNode _createSimpleKaaba(vector.Vector3 position, double rotation) {
@@ -158,7 +158,8 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
         materials: [
           ARKitMaterial(
             diffuse: ARKitMaterialProperty.color(Colors.green),
-            emission: ARKitMaterialProperty.color(Colors.green.withValues(alpha: 0.5)),
+            emission: ARKitMaterialProperty.color(
+                Colors.green.withValues(alpha: 0.5)),
           ),
         ],
       ),
@@ -181,10 +182,10 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
     double angleDiff = widget.qiblaBearing - _currentHeading;
     while (angleDiff > 180) angleDiff -= 360;
     while (angleDiff < -180) angleDiff += 360;
-    
+
     final shouldShowLeftArrow = angleDiff < -5; // More than 5° to the left
     final shouldShowRightArrow = angleDiff > 5; // More than 5° to the right
-    
+
     return Stack(
       children: [
         // AR View
@@ -194,7 +195,7 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
           planeDetection: ARPlaneDetection.horizontal,
           showFeaturePoints: false,
         ),
-        
+
         // Left/Right arrow hints (like iOS project)
         if (shouldShowLeftArrow || shouldShowRightArrow)
           Positioned(
@@ -219,8 +220,8 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
                 ),
                 const SizedBox(height: 10),
                 Icon(
-                  shouldShowLeftArrow 
-                      ? Icons.arrow_circle_left 
+                  shouldShowLeftArrow
+                      ? Icons.arrow_circle_left
                       : Icons.arrow_circle_right,
                   color: Colors.green,
                   size: 100,
@@ -234,15 +235,16 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
               ],
             ),
           ),
-        
+
         // Navigation overlay
-        Positioned(
-          top: 120,
-          left: 0,
-          right: 0,
-          child: _buildNavigationOverlay(),
-        ),
-        
+        if (widget.showOverlay)
+          Positioned(
+            top: 120,
+            left: 0,
+            right: 0,
+            child: _buildNavigationOverlay(),
+          ),
+
         // Kaaba image overlay (centered, same as splash screen)
         Center(
           child: Column(
@@ -290,8 +292,10 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildInfoChip('You', '${_currentHeading.toStringAsFixed(0)}°', Colors.blue),
-          _buildInfoChip('Qibla', '${widget.qiblaBearing.toStringAsFixed(0)}°', Colors.green),
+          _buildInfoChip(
+              'You', '${_currentHeading.toStringAsFixed(0)}°', Colors.blue),
+          _buildInfoChip('Qibla', '${widget.qiblaBearing.toStringAsFixed(0)}°',
+              Colors.green),
         ],
       ),
     );

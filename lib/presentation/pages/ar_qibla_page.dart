@@ -60,6 +60,7 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
 
   @override
   void dispose() {
+    if(!context.mounted) return;
     context.read<TiltCubit>().close();
     super.dispose();
   }
@@ -124,10 +125,12 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                     ? ARViewEnhancedAndroid(
                         qiblaBearing: _qiblaBearing ?? 0,
                         deviceHeading: _deviceHeading ?? 0,
+                        showOverlay: widget.config.showTopBar,
                       )
                     : ARViewEnhancedIOS(
                         qiblaBearing: _qiblaBearing ?? 0,
                         deviceHeading: _deviceHeading ?? 0,
+                        showOverlay: widget.config.showTopBar,
                       ),
 
               // Loading indicator
