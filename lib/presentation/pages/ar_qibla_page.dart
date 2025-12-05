@@ -60,8 +60,9 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
 
   @override
   void dispose() {
-    if(!context.mounted) return;
-    context.read<TiltCubit>().close();
+    if(context.mounted) {
+      context.read<TiltCubit>().close();
+    }
     super.dispose();
   }
 

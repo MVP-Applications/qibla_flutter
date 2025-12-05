@@ -245,38 +245,8 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
             child: _buildNavigationOverlay(),
           ),
 
-        // Kaaba image overlay (centered, same as splash screen)
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // White arrow pointing down
-              const Icon(
-                Icons.arrow_downward,
-                color: Colors.white,
-                size: 48,
-                shadows: [
-                  Shadow(
-                    color: Colors.black,
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Kaaba image (transparent, no border/shadow)
-              Opacity(
-                opacity: 0.8, // Semi-transparent
-                child: Image.asset(
-                  'assets/images/qibla.png',
-                  package: 'qibla_ar_finder',
-                  width: 120,
-                  height: 150,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Kaaba image overlay - ALWAYS visible, locked to exact Qibla direction
+        _buildKaabaPositionedOverlay(angleDiff, context),
       ],
     );
   }
@@ -321,6 +291,53 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
               color: color,
               fontSize: 14,
               fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Build Kaaba positioned overlay based on Qibla direction
+  Widget _buildKaabaPositionedOverlay(double angleDiff, BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    
+    // Calculate position based on angle difference
+    const fovHorizontal = 70.0;
+    final horizontalPixelsPerDegree = screenSize.width / fovHorizontal;
+    
+    // Calculate horizontal offset
+    final horizontalOffset = angleDiff * horizontalPixelsPerDegree;
+    final xPosition = (screenSize.width / 2) + horizontalOffset;
+    
+    return Positioned(
+      left: xPosition - 60, // Center the Kaaba
+      top: screenSize.height / 2 - 75, // Center vertically
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // White arrow pointing down
+          const Icon(
+            Icons.arrow_downward,
+            color: Colors.white,
+            size: 48,
+            shadows: [
+              Shadow(
+                color: Colors.black,
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Kaaba image (transparent, no border/shadow)
+          Opacity(
+            opacity: 0.8, // Semi-transparent
+            child: Image.asset(
+              'assets/images/qibla.png',
+              package: 'qibla_ar_finder',
+              width: 120,
+              height: 150,
+              fit: BoxFit.contain,
             ),
           ),
         ],

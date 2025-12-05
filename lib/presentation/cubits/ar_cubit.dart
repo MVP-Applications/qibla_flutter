@@ -56,11 +56,25 @@ class ARCubit extends Cubit<ARState> {
       }
 
       // Otherwise, get location (fallback for direct AR access)
-      debugPrint('AR: Getting user location (this may take 10-30 seconds)...');
+      debugPrint('AR: Checking location permission...');
+      final locationStatus = await Permission.location.status;
+      
+      if (!locationStatus.isGranted) {
+        debugPrint('AR: Requesting location permission...');
+        final result = await Permission.location.request();
+        if (!result.isGranted) {
+          debugPrint('AR: Location permission denied');
+          emit(const ARError('Location permission is required to calculate Qibla direction'));
+          return;
+        }
+      }
+      debugPrint('AR: Location permission granted');
+      
+      debugPrint('AR: Getting user location (this may take 30-60 seconds)...');
       try {
         final locationStream = getUserLocation();
         _userLocation = await locationStream.first.timeout(
-          const Duration(seconds: 30),
+          const Duration(seconds: 60), // Increased timeout to 60 seconds
         );
         
         debugPrint('AR: Location acquired: ${_userLocation?.latitude}, ${_userLocation?.longitude}');
@@ -87,14 +101,20 @@ class ARCubit extends Cubit<ARState> {
         // Provide helpful error message
         String errorMessage = 'Unable to get GPS location.\n\n';
         if (e.toString().contains('TimeoutException')) {
-          errorMessage += 'GPS is taking too long to acquire signal.\n\n'
-              'Tips:\n'
-              '• Go outdoors for better GPS signal\n'
-              '• Wait 30-60 seconds for GPS lock\n'
-              '• Ensure Location Services are enabled\n'
-              '• Try restarting your device';
+          errorMessage += 'GPS signal acquisition timed out.\n\n'
+              'What to do:\n'
+              '1. Go outdoors (away from buildings)\n'
+              '2. Wait 30-60 seconds for GPS lock\n'
+              '3. Ensure Location Services are ON\n'
+              '4. Check that app has location permission\n'
+              '5. Try restarting the app\n\n'
+              'GPS needs clear sky view to work.';
+        } else if (e.toString().contains('Permission')) {
+          errorMessage += 'Location permission was denied.\n\n'
+              'Please enable location permission in:\n'
+              'Settings > [App Name] > Location';
         } else {
-          errorMessage += e.toString();
+          errorMessage += 'Error: ${e.toString()}';
         }
         
         emit(ARError(errorMessage));

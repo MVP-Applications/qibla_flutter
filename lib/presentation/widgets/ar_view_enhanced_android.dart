@@ -122,6 +122,7 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
   }
 
   // Calculate where the Kaaba should appear on screen based on device orientation
+  // Kaaba is ALWAYS visible and locked to exact Qibla direction
   Offset _calculateKaabaScreenPosition(Size screenSize) {
     // Calculate angle difference between current heading and Qibla
     double angleDiff = widget.qiblaBearing - _currentHeading;
@@ -200,7 +201,7 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
             ),
           ),
         
-        // World-anchored Kaaba - stays fixed in Qibla direction (always visible)
+        // Kaaba - ALWAYS visible, locked to exact Qibla direction
         Positioned(
           left: kaabaPosition.dx - 50, // Center the 100px wide Kaaba
           top: kaabaPosition.dy - 60,  // Center the 120px tall Kaaba
