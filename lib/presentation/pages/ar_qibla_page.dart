@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/ar_cubit.dart';
 import '../cubits/ar_state.dart';
-import '../cubits/qibla_cubit.dart';
-import '../cubits/qibla_state.dart';
 import '../cubits/tilt_cubit.dart';
 import '../cubits/tilt_state.dart';
 import '../widgets/ar_view_enhanced_android.dart';
@@ -60,26 +58,14 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
 
   @override
   void dispose() {
-    if(context.mounted) {
+    if (context.mounted) {
       context.read<TiltCubit>().close();
     }
     super.dispose();
   }
 
   Future<void> _initializeAR() async {
-    // Try to get Qibla bearing from QiblaCubit (if available from compass page)
-    double? existingQiblaBearing;
-    try {
-      final qiblaState = context.read<QiblaCubit>().state;
-      if (qiblaState is QiblaUpdated) {
-        existingQiblaBearing = qiblaState.qiblaData.qiblaDirection;
-        debugPrint('AR: Got Qibla bearing from compass: $existingQiblaBearing°');
-      }
-    } catch (e) {
-      debugPrint('AR: Could not get Qibla from compass cubit: $e');
-    }
-    
-    await context.read<ARCubit>().initializeAR(existingQiblaBearing: existingQiblaBearing);
+    await context.read<ARCubit>().initializeAR();
     _updateBearingInfo();
   }
  
@@ -320,7 +306,7 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
           );
         },
       ),
-      // Vertical position warning overlay (handled at page level using TiltCubit)
+      // Vertical position warning overlay
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: BlocBuilder<TiltCubit, TiltState>(
         builder: (context, tiltState) {

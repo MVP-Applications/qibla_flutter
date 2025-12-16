@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_device_tilt.dart';
 import 'tilt_state.dart';
 
+/// Cubit for monitoring device tilt/vertical position
 class TiltCubit extends Cubit<TiltState> {
   final GetDeviceTilt getDeviceTilt;
   StreamSubscription? _tiltSubscription;
@@ -11,6 +12,7 @@ class TiltCubit extends Cubit<TiltState> {
 
   TiltCubit({required this.getDeviceTilt}) : super(TiltInitial());
 
+  /// Start monitoring device tilt
   void startMonitoring() {
     _tiltSubscription = getDeviceTilt().listen((isVertical) {
       if (isVertical) {

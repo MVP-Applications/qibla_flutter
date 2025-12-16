@@ -34,7 +34,6 @@ dependencies:
   
   # Utilities
   vector_math: ^2.1.4
-  vibration: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -43,7 +42,8 @@ dev_dependencies:
 
 flutter:
   assets:
-    - assets/images/
+    - assets/images/qibla.png
+    - assets/models/
 
 # Platform support
 platforms:
