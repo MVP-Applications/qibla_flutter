@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qibla_ar_finder/qibla_ar_finder.dart';
+import 'package:get_it/get_it.dart';
+
+final getIt = GetIt.instance;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +52,6 @@ class ExampleHomePage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => getIt<QiblaCubit>()),
                     BlocProvider(create: (_) => getIt<ARCubit>()),
                     BlocProvider(create: (_) => getIt<TiltCubit>()),
                   ],
@@ -57,7 +59,7 @@ class ExampleHomePage extends StatelessWidget {
                     config: ARPageConfig(
                       showTopBar: false,
                       showInstructions: false,
-                      showCompassIndicators:false,
+                      showCompassIndicators: false,
                     ),
                   ),
                 ),
@@ -76,7 +78,6 @@ class ExampleHomePage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => getIt<QiblaCubit>()),
                     BlocProvider(create: (_) => getIt<ARCubit>()),
                     BlocProvider(create: (_) => getIt<TiltCubit>()),
                   ],
@@ -90,35 +91,6 @@ class ExampleHomePage extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildExampleCard(
-            context,
-            title: 'Compass View',
-            description: 'Traditional compass with Qibla indicator',
-            icon: Icons.explore,
-            color: Colors.green,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BlocProvider(
-                  create: (_) => getIt<QiblaCubit>(),
-                  child: const QiblaCompassPage(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildExampleCard(
-            context,
-            title: 'Panorama View',
-            description: '360° view with Kaaba',
-            icon: Icons.panorama,
-            color: Colors.orange,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const PanoramaKaabaPage()),
             ),
           ),
         ],
