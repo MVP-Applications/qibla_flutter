@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   
   # State management (required for BLoC providers)
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.1.1
   
   # Use the package from parent directory
   qibla_ar_finder:
