@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 class VerticalPositionWarning extends StatelessWidget {
   final bool animate;
   final String message;
+  final Color? color;
 
   const VerticalPositionWarning({
     super.key,
     this.animate = true,
+    this.color,
     required this.message,
   });
 
@@ -32,7 +34,7 @@ class VerticalPositionWarning extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 margin: const EdgeInsets.symmetric(horizontal: 30),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.2),
+                  color: color ?? Colors.green.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(

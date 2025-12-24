@@ -29,6 +29,7 @@ class ARPageConfig {
 
   /// Custom message (if showInstructions is true)
   final String message;
+  final Color? cardMSGColor;
 
   /// Custom title text (if showTopBar is true)
   final String? customTitle;
@@ -39,6 +40,7 @@ class ARPageConfig {
     this.showCompassIndicators = true,
     this.customTitle,
     this.retry,
+    this.cardMSGColor,
     required this.primaryColor,
     required this.moveRightText,
     required this.moveLeftText,
@@ -355,6 +357,7 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                 child: VerticalPositionWarning(
                   animate: tiltState.animateIcon,
                   message: widget.config.message,
+                  color: widget.config.cardMSGColor,
                 ));
           }
           return const SizedBox.shrink();
