@@ -13,22 +13,36 @@ import '../widgets/vertical_position_warning.dart';
 class ARPageConfig {
   /// Show the top title bar with "AR Qibla Direction"
   final bool showTopBar;
-  
+
   /// Show the bottom instructions overlay
   final bool showInstructions;
-  
+
   /// Show the compass indicators (Qibla bearing and device heading)
   final bool showCompassIndicators;
-  
+
+  /// Show the retry button
+  final String? retry;
+
+  /// Custom text for the move right and move left buttons
+  final String moveRightText;
+  final String moveLeftText;
+
+  /// Custom message (if showInstructions is true)
+  final String message;
+
   /// Custom title text (if showTopBar is true)
   final String? customTitle;
-final Color primaryColor;
+  final Color primaryColor;
   const ARPageConfig({
     this.showTopBar = false,
     this.showInstructions = false,
     this.showCompassIndicators = true,
     this.customTitle,
-   required this.primaryColor,
+    this.retry,
+    required this.primaryColor,
+    required this.moveRightText,
+    required this.moveLeftText,
+    required this.message,
   });
 }
 
@@ -69,7 +83,7 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
     await context.read<ARCubit>().initializeAR();
     _updateBearingInfo();
   }
- 
+
   void _updateBearingInfo() {
     final arCubit = context.read<ARCubit>();
     setState(() {
@@ -94,7 +108,7 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                 duration: const Duration(seconds: 5),
                 backgroundColor: Colors.red,
                 action: SnackBarAction(
-                  label: 'Retry',
+                  label: widget.config.retry ?? 'Retry',
                   textColor: Colors.white,
                   onPressed: () {
                     _initializeAR();
@@ -108,19 +122,26 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
           return Stack(
             children: [
               // Enhanced AR View based on platform
-              if (state is ARReady || state is ARPlaneDetected || state is ARObjectPlaced || state is ARObjectUpdated)
+              if (state is ARReady ||
+                  state is ARPlaneDetected ||
+                  state is ARObjectPlaced ||
+                  state is ARObjectUpdated)
                 Platform.isAndroid
                     ? ARViewEnhancedAndroid(
                         qiblaBearing: _qiblaBearing ?? 0,
                         deviceHeading: _deviceHeading ?? 0,
                         showOverlay: widget.config.showTopBar,
                         primaryColor: widget.config.primaryColor,
+                        moveRightText: widget.config.moveRightText,
+                        moveLeftText: widget.config.moveLeftText,
                       )
                     : ARViewEnhancedIOS(
                         qiblaBearing: _qiblaBearing ?? 0,
                         deviceHeading: _deviceHeading ?? 0,
                         showOverlay: widget.config.showTopBar,
                         primaryColor: widget.config.primaryColor,
+                        moveRightText: widget.config.moveRightText,
+                        moveLeftText: widget.config.moveLeftText,
                       ),
 
               // Loading indicator
@@ -142,11 +163,13 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.white, size: 48),
+                        const Icon(Icons.error_outline,
+                            color: Colors.white, size: 48),
                         const SizedBox(height: 16),
                         Text(
                           state.message,
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 14),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 20),
@@ -154,10 +177,11 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                           onPressed: () => _initializeAR(),
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
                           ),
-                          child: const Text(
-                            'Retry',
+                          child: Text(
+                            widget.config.retry ?? 'Retry',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
                         ),
@@ -174,7 +198,8 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                   right: 0,
                   child: SafeArea(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -200,8 +225,10 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                 ),
 
               // Instructions overlay (OPTIONAL)
-              if (widget.config.showInstructions && 
-                  (state is ARReady || state is ARPlaneDetected || state is ARObjectPlaced))
+              if (widget.config.showInstructions &&
+                  (state is ARReady ||
+                      state is ARPlaneDetected ||
+                      state is ARObjectPlaced))
                 Positioned(
                   bottom: 30,
                   left: 20,
@@ -215,11 +242,15 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.explore, color: Colors.green, size: 32),
+                        const Icon(Icons.explore,
+                            color: Colors.green, size: 32),
                         const SizedBox(height: 8),
                         const Text(
                           'Kaaba placed automatically in Qibla direction',
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
@@ -248,7 +279,8 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                       ),
                       child: Column(
                         children: [
-                          const Icon(Icons.explore, color: Colors.white, size: 24),
+                          const Icon(Icons.explore,
+                              color: Colors.white, size: 24),
                           const SizedBox(height: 4),
                           Text(
                             _qiblaBearing == 0.0 ? 'Default' : 'Qibla',
@@ -258,7 +290,9 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                             ),
                           ),
                           Text(
-                            _qiblaBearing == 0.0 ? 'North' : '${_qiblaBearing!.toStringAsFixed(0)}°',
+                            _qiblaBearing == 0.0
+                                ? 'North'
+                                : '${_qiblaBearing!.toStringAsFixed(0)}°',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -283,7 +317,8 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                       ),
                       child: Column(
                         children: [
-                          const Icon(Icons.navigation, color: Colors.white, size: 24),
+                          const Icon(Icons.navigation,
+                              color: Colors.white, size: 24),
                           const SizedBox(height: 4),
                           const Text(
                             'Heading',
@@ -293,16 +328,16 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
                             ),
                           ),
                           Text(
-                          '${_deviceHeading!.toStringAsFixed(0)}°',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            '${_deviceHeading!.toStringAsFixed(0)}°',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   ),
               ],
             ],
@@ -315,7 +350,12 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
         builder: (context, tiltState) {
           // Show warning when phone is not vertical
           if (tiltState is TiltNotVertical) {
-            return VerticalPositionWarning(animate: tiltState.animateIcon);
+            return Container(
+                margin: const EdgeInsets.only(top: 45),
+                child: VerticalPositionWarning(
+                  animate: tiltState.animateIcon,
+                  message: widget.config.message,
+                ));
           }
           return const SizedBox.shrink();
         },

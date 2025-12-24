@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 /// Shows when phone is not held in vertical position
 class VerticalPositionWarning extends StatelessWidget {
   final bool animate;
+  final String message;
 
   const VerticalPositionWarning({
     super.key,
     this.animate = true,
+    required this.message,
   });
 
   @override
@@ -40,9 +42,8 @@ class VerticalPositionWarning extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Text(
-                  'Rotate your phone to a vertical position.\n\n'
-                  'Hold it upright so the compass can accurately detect the Qibla direction.',
+                child: Text(
+                  message,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,

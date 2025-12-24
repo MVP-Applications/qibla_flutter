@@ -13,12 +13,16 @@ class ARViewEnhancedIOS extends StatefulWidget {
   final double deviceHeading;
   final bool showOverlay;
   final Color primaryColor;
+  final String moveRightText;
+  final String moveLeftText;
   const ARViewEnhancedIOS({
     super.key,
     required this.qiblaBearing,
     required this.deviceHeading,
     required this.showOverlay,
-   required this.primaryColor,
+    required this.primaryColor,
+    required this.moveRightText,
+    required this.moveLeftText,
   });
 
   @override
@@ -206,7 +210,7 @@ class _ARViewEnhancedIOSState extends State<ARViewEnhancedIOS> {
             child: Column(
               children: [
                 Text(
-                  angleDiff < -5 ? 'Move Left' : 'Move Right',
+                  angleDiff < -5 ? widget.moveLeftText : widget.moveRightText,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
