@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qibla_ar_finder/qibla_ar_finder.dart';
+import 'package:qibla_ar_finder/ar_pre_initializer.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   configureDependencies();
+  await preInitializeAR(); // Pre-initialize AR for instant loading
   runApp(const QiblaARFinderExample());
 }
 
@@ -52,7 +54,7 @@ class ExampleHomePage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => getIt<ARCubit>()),
+                    BlocProvider.value(value: getIt<ARCubit>()),
                     BlocProvider(create: (_) => getIt<TiltCubit>()),
                   ],
                   child: const ARQiblaPage(
@@ -84,7 +86,7 @@ class ExampleHomePage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => getIt<ARCubit>()),
+                    BlocProvider.value(value: getIt<ARCubit>()),
                     BlocProvider(create: (_) => getIt<TiltCubit>()),
                   ],
                   child: const ARQiblaPage(
@@ -95,7 +97,7 @@ class ExampleHomePage extends StatelessWidget {
                       primaryColor: Colors.green,
                       customTitle: 'Find Qibla',
                       retry: 'Retry',
-                       moveLeftText: 'Move Left',
+                      moveLeftText: 'Move Left',
                       moveRightText: 'Move Right',
                       message: 'Rotate your phone to a vertical position.\n\n'
                           'Hold it upright so the compass can accurately detect the Qibla direction.',

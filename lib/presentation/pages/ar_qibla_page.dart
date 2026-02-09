@@ -82,7 +82,13 @@ class _ARQiblaPageState extends State<ARQiblaPage> {
   }
 
   Future<void> _initializeAR() async {
-    await context.read<ARCubit>().initializeAR();
+    final arCubit = context.read<ARCubit>();
+    if (arCubit.state is! ARInitial && arCubit.state is! ARError) {
+      // Already initialized or initializing
+      _updateBearingInfo();
+      return;
+    }
+    await arCubit.initializeAR();
     _updateBearingInfo();
   }
 

@@ -25,7 +25,7 @@
 library;
 
 // Core - Dependency Injection
-export 'core/di/injection.dart';
+export 'package:qibla_ar_finder/core/di/injection.dart';
 
 // Domain - Entities
 export 'domain/entities/location_data.dart';

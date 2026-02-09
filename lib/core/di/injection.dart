@@ -14,20 +14,21 @@ final getIt = GetIt.instance;
 
 void configureDependencies() {
   // Repositories
-  getIt.registerLazySingleton<LocationRepository>(() => LocationRepositoryImpl());
+  getIt.registerLazySingleton<LocationRepository>(
+      () => LocationRepositoryImpl());
   getIt.registerLazySingleton<SensorRepository>(() => SensorRepositoryImpl());
-  
+
   // Use Cases
   getIt.registerLazySingleton(() => GetUserLocation(getIt()));
   getIt.registerLazySingleton(() => GetDeviceHeading(getIt()));
   getIt.registerLazySingleton(() => GetDeviceTilt(getIt()));
   getIt.registerLazySingleton(() => GetARQiblaBearing());
-  
+
   // Cubits
-  getIt.registerFactory(() => ARCubit(
-    getUserLocation: getIt(),
-    getARQiblaBearing: getIt(),
-    getDeviceHeading: getIt(),
-  ));
+  getIt.registerSingleton(() => ARCubit(
+        getUserLocation: getIt(),
+        getARQiblaBearing: getIt(),
+        getDeviceHeading: getIt(),
+      ));
   getIt.registerFactory(() => TiltCubit(getDeviceTilt: getIt()));
 }
