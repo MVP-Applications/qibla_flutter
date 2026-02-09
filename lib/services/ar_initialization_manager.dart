@@ -286,14 +286,9 @@ class ARInitializationManager {
     String errorMessage = 'Unable to initialize AR.\n\n';
     
     if (error.toString().contains('TimeoutException')) {
-      errorMessage += 'GPS signal acquisition timed out.\n\n'
-          'What to do:\n'
-          '1. Go outdoors (away from buildings)\n'
-          '2. Wait 30-60 seconds for GPS lock\n'
-          '3. Ensure Location Services are ON\n'
-          '4. Check that app has location permission\n'
-          '5. Try restarting the app\n\n'
-          'GPS needs clear sky view to work.';
+      errorMessage +=  'Unable to determine your location.\n\n'
+        'We\'re having trouble getting your location right now.\n\n'
+        'Please move to a different place and make sure location services are enabled, then try again.';
     } else if (error.toString().contains('Permission') || 
                error.toString().contains('permission')) {
       errorMessage += 'Required permission was denied.\n\n'
