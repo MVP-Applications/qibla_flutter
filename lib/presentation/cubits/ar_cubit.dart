@@ -133,16 +133,12 @@ class ARCubit extends Cubit<ARState> {
         debugPrint('AR: Location error: $e');
         
         // Provide helpful error message
-        String errorMessage = 'Unable to get GPS location.\n\n';
+        String errorMessage = 'Unable to determine your location.\n\n';
         if (e.toString().contains('TimeoutException')) {
-          errorMessage += 'GPS signal acquisition timed out.\n\n'
-              'What to do:\n'
-              '1. Go outdoors (away from buildings)\n'
-              '2. Wait 30-60 seconds for GPS lock\n'
-              '3. Ensure Location Services are ON\n'
-              '4. Check that app has location permission\n'
-              '5. Try restarting the app\n\n'
-              'GPS needs clear sky view to work.';
+          errorMessage += 
+            'We\'re having trouble getting your location right now.\n\n'
+            'Please move to a different place and make sure location services are enabled, then try again.';
+        
         } else if (e.toString().contains('Permission')) {
           errorMessage += 'Location permission was denied.\n\n'
               'Please enable location permission in:\n'

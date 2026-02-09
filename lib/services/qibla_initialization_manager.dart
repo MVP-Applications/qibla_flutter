@@ -60,28 +60,30 @@ class QiblaInitializationState {
   bool get isInitialized => status == QiblaInitializationStatus.initialized;
   bool get isInitializing => status == QiblaInitializationStatus.initializing;
   bool get hasFailed => status == QiblaInitializationStatus.failed;
-  bool get canRetry => status == QiblaInitializationStatus.failed || 
-                       status == QiblaInitializationStatus.notInitialized;
-  bool get hasLocationPermission => locationStatus?.enabled == true && 
-    (locationStatus?.status == LocationPermission.always || 
-     locationStatus?.status == LocationPermission.whileInUse);
+  bool get canRetry =>
+      status == QiblaInitializationStatus.failed ||
+      status == QiblaInitializationStatus.notInitialized;
+  bool get hasLocationPermission =>
+      locationStatus?.enabled == true &&
+      (locationStatus?.status == LocationPermission.always ||
+          locationStatus?.status == LocationPermission.whileInUse);
 }
 
 /// Singleton manager for Qibla initialization
-/// 
+///
 /// This manager allows consuming projects to pre-initialize Qibla resources
 /// during app startup, reducing loading time when the Qibla screen is opened.
-/// 
+///
 /// Usage in consuming project:
 /// ```dart
 /// // In main() or splash screen
 /// await QiblaInitializationManager.instance.initialize();
-/// 
+///
 /// // Check status before navigation
 /// if (QiblaInitializationManager.instance.state.isInitialized) {
 ///   Navigator.push(context, MaterialPageRoute(builder: (_) => QiblaScreen()));
 /// }
-/// 
+///
 /// // Listen to initialization progress
 /// QiblaInitializationManager.instance.stateStream.listen((state) {
 ///   print('Qibla Status: ${state.status}');
@@ -89,7 +91,7 @@ class QiblaInitializationState {
 /// ```
 class QiblaInitializationManager {
   static QiblaInitializationManager? _instance;
-  
+
   /// Get the singleton instance
   static QiblaInitializationManager get instance {
     _instance ??= QiblaInitializationManager._internal();
@@ -137,19 +139,19 @@ class QiblaInitializationManager {
   }
 
   /// Initialize Qibla resources
-  /// 
+  ///
   /// This method can be called during app startup to pre-initialize Qibla.
   /// It handles:
   /// - Location permission requests
   /// - GPS location acquisition
   /// - Qibla bearing calculation
   /// - Location status checking
-  /// 
+  ///
   /// Parameters:
   /// - [existingQiblaBearing]: Optional pre-calculated Qibla bearing
   /// - [timeout]: Maximum time to wait for GPS (default: 60 seconds)
   /// - [skipLocationIfFailed]: If true, continues with default bearing on location failure
-  /// 
+  ///
   /// Returns: true if initialization succeeded, false otherwise
   Future<bool> initialize({
     double? existingQiblaBearing,
@@ -158,7 +160,8 @@ class QiblaInitializationManager {
   }) async {
     // Prevent concurrent initialization
     if (_state.isInitializing) {
-      debugPrint('QiblaInitializationManager: Already initializing, waiting...');
+      debugPrint(
+          'QiblaInitializationManager: Already initializing, waiting...');
       await stateStream.firstWhere((s) => !s.isInitializing);
       return _state.isInitialized;
     }
@@ -178,9 +181,8 @@ class QiblaInitializationManager {
       // Ensure dependencies are configured
       if (_getUserLocation == null || _getARQiblaBearing == null) {
         throw Exception(
-          'QiblaInitializationManager dependencies not configured. '
-          'Ensure configureDependencies() is called during package setup.'
-        );
+            'QiblaInitializationManager dependencies not configured. '
+            'Ensure configureDependencies() is called during package setup.');
       }
 
       double? qiblaBearing;
@@ -189,52 +191,60 @@ class QiblaInitializationManager {
 
       // Use existing Qibla bearing if provided
       if (existingQiblaBearing != null) {
-        debugPrint('QiblaInitializationManager: Using existing Qibla bearing: $existingQiblaBearing°');
+        debugPrint(
+            'QiblaInitializationManager: Using existing Qibla bearing: $existingQiblaBearing°');
         qiblaBearing = existingQiblaBearing;
-        
+
         // Still check location status for UI purposes
         try {
           locationStatus = await QiblahService.checkLocationStatus();
         } catch (e) {
-          debugPrint('QiblaInitializationManager: Could not get location status: $e');
+          debugPrint(
+              'QiblaInitializationManager: Could not get location status: $e');
         }
       } else {
         // Get location status first
         try {
           debugPrint('QiblaInitializationManager: Checking location status...');
           locationStatus = await QiblahService.checkLocationStatus();
-          
+
           if (!locationStatus.enabled) {
-            throw Exception('Location services are disabled. Please enable location services.');
+            throw Exception(
+                'Location services are disabled. Please enable location services.');
           }
-          
+
           if (locationStatus.status == LocationPermission.denied) {
-            debugPrint('QiblaInitializationManager: Requesting location permission...');
+            debugPrint(
+                'QiblaInitializationManager: Requesting location permission...');
             await QiblahService.requestPermissions();
             locationStatus = await QiblahService.checkLocationStatus();
           }
-          
-          if (locationStatus.status == LocationPermission.denied || 
+
+          if (locationStatus.status == LocationPermission.denied ||
               locationStatus.status == LocationPermission.deniedForever) {
-            throw Exception('Location permission is required to calculate Qibla direction');
+            throw Exception(
+                'Location permission is required to calculate Qibla direction');
           }
-          
+
           debugPrint('QiblaInitializationManager: Location permission granted');
-          
+
           // Get GPS location
-          debugPrint('QiblaInitializationManager: Getting user location (timeout: ${timeout.inSeconds}s)...');
+          debugPrint(
+              'QiblaInitializationManager: Getting user location (timeout: ${timeout.inSeconds}s)...');
           final locationStream = _getUserLocation!();
           userLocation = await locationStream.first.timeout(timeout);
-          
-          debugPrint('QiblaInitializationManager: Location acquired: ${userLocation.latitude}, ${userLocation.longitude}');
-          
+
+          debugPrint(
+              'QiblaInitializationManager: Location acquired: ${userLocation.latitude}, ${userLocation.longitude}');
+
           // Calculate Qibla bearing
           qiblaBearing = _getARQiblaBearing!(userLocation);
-          debugPrint('QiblaInitializationManager: Qibla bearing calculated: $qiblaBearing°');
-          
+          debugPrint(
+              'QiblaInitializationManager: Qibla bearing calculated: $qiblaBearing°');
         } catch (e) {
           if (skipLocationIfFailed) {
-            debugPrint('QiblaInitializationManager: Location failed but continuing with defaults: $e');
+            debugPrint(
+                'QiblaInitializationManager: Location failed but continuing with defaults: $e');
             qiblaBearing = 0.0;
             // Try to get location status anyway
             try {
@@ -259,12 +269,11 @@ class QiblaInitializationManager {
 
       debugPrint('QiblaInitializationManager: Initialization complete');
       return true;
-
     } catch (e) {
       debugPrint('QiblaInitializationManager: Initialization failed: $e');
-      
+
       String errorMessage = _buildErrorMessage(e);
-      
+
       _updateState(QiblaInitializationState(
         status: QiblaInitializationStatus.failed,
         errorMessage: errorMessage,
@@ -276,18 +285,13 @@ class QiblaInitializationManager {
 
   String _buildErrorMessage(dynamic error) {
     String errorMessage = 'Unable to initialize Qibla finder.\n\n';
-    
+
     if (error.toString().contains('TimeoutException')) {
-      errorMessage += 'GPS signal acquisition timed out.\n\n'
-          'What to do:\n'
-          '1. Go outdoors (away from buildings)\n'
-          '2. Wait 30-60 seconds for GPS lock\n'
-          '3. Ensure Location Services are ON\n'
-          '4. Check that app has location permission\n'
-          '5. Try restarting the app\n\n'
-          'GPS needs clear sky view to work.';
-    } else if (error.toString().contains('Permission') || 
-               error.toString().contains('permission')) {
+      errorMessage += 'Unable to determine your location.\n\n'
+          'We\'re having trouble getting your location right now.\n\n'
+          'Please move to a different place and make sure location services are enabled, then try again.';
+    } else if (error.toString().contains('Permission') ||
+        error.toString().contains('permission')) {
       errorMessage += 'Location permission was denied.\n\n'
           'Please enable location permission in:\n'
           'Settings > [App Name] > Location';
@@ -298,7 +302,7 @@ class QiblaInitializationManager {
     } else {
       errorMessage += 'Error: ${error.toString()}';
     }
-    
+
     return errorMessage;
   }
 
