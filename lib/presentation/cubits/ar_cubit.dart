@@ -2,12 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async';
 import '../../domain/entities/ar_node_data.dart';
 import '../../domain/entities/location_data.dart';
 import '../../domain/usecases/get_user_location.dart';
 import '../../domain/usecases/get_ar_qibla_bearing.dart';
 import '../../domain/usecases/get_device_heading.dart';
 import '../../services/ar_initialization_manager.dart';
+import '../../services/magnetic_interference_detector.dart';
 import 'ar_state.dart';
 
 class ARCubit extends Cubit<ARState> {
@@ -25,6 +27,30 @@ class ARCubit extends Cubit<ARState> {
   LocationData? _userLocation;
   double? _qiblaBearing;
   double? _deviceHeading;
+  StreamSubscription? _interferenceSubscription;
+
+  @override
+  Future<void> close() {
+    _interferenceSubscription?.cancel();
+    MagneticInterferenceDetector.instance.stopMonitoring();
+    return super.close();
+  }
+
+  /// Start monitoring magnetic interference
+  void startInterferenceMonitoring() {
+    _interferenceSubscription?.cancel();
+    
+    final stream = MagneticInterferenceDetector.instance.startMonitoring();
+    _interferenceSubscription = stream.listen((data) {
+      emit(ARMagneticInterferenceDetected(data.isInterferenceDetected));
+    });
+  }
+
+  /// Stop monitoring magnetic interference
+  void stopInterferenceMonitoring() {
+    _interferenceSubscription?.cancel();
+    MagneticInterferenceDetector.instance.stopMonitoring();
+  }
 
   Future<void> initializeAR({double? existingQiblaBearing}) async {
     // Check if AR is already pre-initialized by ARInitializationManager

@@ -30,6 +30,7 @@ export 'core/di/injection.dart';
 // Domain - Entities
 export 'domain/entities/location_data.dart';
 export 'domain/entities/ar_node_data.dart';
+export 'domain/entities/magnetic_interference_data.dart';
 
 // Domain - Use Cases
 export 'domain/usecases/get_user_location.dart';
@@ -46,6 +47,7 @@ export 'presentation/widgets/ar_view_enhanced_ios.dart';
 
 // Presentation - Widgets
 export 'presentation/widgets/vertical_position_warning.dart';
+export 'presentation/widgets/magnetic_interference_warning.dart';
 
 // Presentation - State Management (Cubits)
 export 'presentation/cubits/ar_cubit.dart';
@@ -57,6 +59,7 @@ export 'presentation/cubits/tilt_state.dart';
 export 'services/qiblah_service.dart';
 export 'services/ar_initialization_manager.dart';
 export 'services/qibla_initialization_manager.dart';
+export 'services/magnetic_interference_detector.dart';
 
 // Utils
 export 'utils/qiblah_utils.dart';

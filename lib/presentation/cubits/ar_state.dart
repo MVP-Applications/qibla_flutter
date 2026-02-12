@@ -44,3 +44,12 @@ class ARError extends ARState {
   @override
   List<Object?> get props => [message];
 }
+
+class ARMagneticInterferenceDetected extends ARState {
+  final bool isDetected;
+
+  const ARMagneticInterferenceDetected(this.isDetected);
+
+  @override
+  List<Object?> get props => [isDetected];
+}

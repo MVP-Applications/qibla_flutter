@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import '../cubits/ar_cubit.dart';
+import '../cubits/ar_state.dart';
+import 'magnetic_interference_warning.dart';
 
 /// Enhanced AR View for Android - Same as iOS
 /// The Kaaba stays fixed in the Qibla direction regardless of phone movement
@@ -36,12 +38,16 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
   // Real-time compass tracking
   StreamSubscription? _compassSubscription;
   double _currentHeading = 0.0;
+  
+  // Magnetic interference detection
+  bool _showInterferenceWarning = false;
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
     _startCompassTracking();
+    _startInterferenceMonitoring();
     
     // Notify that AR is ready
     Future.delayed(const Duration(milliseconds: 1500), () {
@@ -78,6 +84,7 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
   void dispose() {
     _compassSubscription?.cancel();
     _cameraController?.dispose();
+    context.read<ARCubit>().stopInterferenceMonitoring();
     super.dispose();
   }
 
@@ -91,6 +98,10 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
     });
   }
 
+  void _startInterferenceMonitoring() {
+    context.read<ARCubit>().startInterferenceMonitoring();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Calculate angle difference for arrow direction
@@ -102,73 +113,91 @@ class _ARViewEnhancedAndroidState extends State<ARViewEnhancedAndroid> {
       angleDiff += 360;
     }
 
-    return Stack(
-      children: [
-        // Camera View
-        if (_isCameraInitialized && _cameraController != null)
-          SizedBox.expand(
-            child: CameraPreview(_cameraController!),
-          )
-        else
-          Container(
-            color: Colors.black,
-            child:  Center(
-              child: CircularProgressIndicator(color:widget. primaryColor),
+    return BlocListener<ARCubit, ARState>(
+      listener: (context, state) {
+        if (state is ARMagneticInterferenceDetected) {
+          setState(() {
+            _showInterferenceWarning = state.isDetected;
+          });
+        }
+      },
+      child: Stack(
+        children: [
+          // Camera View
+          if (_isCameraInitialized && _cameraController != null)
+            SizedBox.expand(
+              child: CameraPreview(_cameraController!),
+            )
+          else
+            Container(
+              color: Colors.black,
+              child: Center(
+                child: CircularProgressIndicator(color: widget.primaryColor),
+              ),
             ),
-          ),
 
-        // Left/Right arrow hints for navigation
-        if (angleDiff < -5 || angleDiff > 5)
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 100,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Text(
-                  angleDiff < -5 ? widget.moveLeftText : widget.moveRightText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
+          // Magnetic Interference Warning (top priority)
+          if (_showInterferenceWarning)
+            const Positioned(
+              top: 60,
+              left: 0,
+              right: 0,
+              child: MagneticInterferenceWarning(),
+            ),
+
+          // Left/Right arrow hints for navigation
+          if (angleDiff < -5 || angleDiff > 5)
+            Positioned(
+              top: MediaQuery.of(context).size.height / 2 - 100,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  Text(
+                    angleDiff < -5 ? widget.moveLeftText : widget.moveRightText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black,
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Icon(
+                    angleDiff < -5
+                        ? Icons.arrow_circle_left
+                        : Icons.arrow_circle_right,
+                    color: widget.primaryColor,
+                    size: 100,
+                    shadows: const [
                       Shadow(
                         color: Colors.black,
                         blurRadius: 10,
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 10),
-                Icon(
-                  angleDiff < -5
-                      ? Icons.arrow_circle_left
-                      : Icons.arrow_circle_right,
-                  color: widget. primaryColor,
-                  size: 100,
-                  shadows: const [
-                    Shadow(
-                      color: Colors.black,
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-        // Navigation overlay
-        if (widget.showOverlay)
-          Positioned(
-            top: 120,
-            left: 0,
-            right: 0,
-            child: _buildNavigationOverlay(),
-          ),
+          // Navigation overlay
+          if (widget.showOverlay)
+            Positioned(
+              top: 120,
+              left: 0,
+              right: 0,
+              child: _buildNavigationOverlay(),
+            ),
 
-        // Kaaba image overlay - ALWAYS visible, locked to exact Qibla direction
-        _buildKaabaPositionedOverlay(angleDiff, context),
-      ],
+          // Kaaba image overlay - ALWAYS visible, locked to exact Qibla direction
+          _buildKaabaPositionedOverlay(angleDiff, context),
+        ],
+      ),
     );
   }
 

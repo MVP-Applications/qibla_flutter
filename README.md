@@ -10,6 +10,7 @@ A professional Flutter package for finding Qibla direction using AR, compass, an
 - 📍 **GPS Location** - Automatic location detection
 - 📱 **Cross-platform** - Works on Android (Camera AR) and iOS (ARKit)
 - ⚠️ **Vertical Warning** - Alerts when device is not held vertically
+- 🧲 **Magnetic Interference Detection** - Warns when metal/electronics affect compass accuracy
 - 🎯 **Accurate** - Uses Haversine formula for precise bearing calculation
 - ⚡ **Pre-Initialization** - Initialize AR during app startup for instant loading
 
@@ -211,8 +212,40 @@ The package now supports pre-initializing AR during app startup for instant load
 1. **GPS Detection** - Gets user's latitude/longitude using `geolocator`
 2. **Qibla Calculation** - Calculates bearing to Kaaba (21.422504°N, 39.826195°E) using Haversine formula
 3. **Compass Tracking** - Monitors device heading using magnetometer
-4. **AR Rendering** - Positions Kaaba image in calculated direction
-5. **Smoothing** - Applies filters to reduce jitter
+4. **Magnetic Interference Detection** - Warns when nearby metal/electronics affect accuracy
+5. **AR Rendering** - Positions Kaaba image in calculated direction
+6. **Smoothing** - Applies filters to reduce jitter
+
+## Magnetic Interference Detection
+
+The package automatically detects when nearby objects are affecting compass accuracy:
+
+### What It Detects
+- 📱 Other mobile phones
+- 🔩 Metal objects (keys, rings, tables)
+- ⚡ Electronic devices (power banks, chargers, laptops)
+- 🔌 Electrical currents
+
+### How It Works
+Uses multi-signal detection:
+- Magnetic field strength monitoring (20-70 µT range)
+- Instability detection (rapid fluctuations)
+- False heading jump detection
+
+### User Experience
+When interference is detected, a warning banner appears:
+```
+⚠️ Magnetic Interference Detected
+
+For accurate Qibla direction, keep your phone 
+away from metal objects and other devices.
+```
+
+### Documentation
+- 📖 [Full Documentation](MAGNETIC_INTERFERENCE_DETECTION.md)
+- 🚀 [Quick Start Guide](MAGNETIC_INTERFERENCE_QUICK_START.md)
+
+**Note**: This is automatic - no configuration needed!
 
 ## Requirements
 
